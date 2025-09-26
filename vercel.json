@@ -2,24 +2,24 @@
   "version": 3,
   "builds": [
     {
-      "src": "package.json",
+      "src": "src/main.ts",
       "use": "@vercel/node",
-      "config": { "includeFiles": ["dist/**"] }
+      "config": {
+        "includeFiles": ["dist/**"]
+      }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist/main.js"
+      "dest": "/dist/main.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"]
     }
   ],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "JWT_SECRET": "@jwt_secret",
-    "CLOUDINARY_CLOUD_NAME": "@cloud_name",
-    "CLOUDINARY_API_KEY": "@cloud_key",
-    "CLOUDINARY_API_SECRET": "@cloud_secret"
-  },
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "functions": {
+    "src/main.ts": {
+      "includeFiles": "dist/**"
+    }
+  }
 }
