@@ -1,0 +1,25 @@
+{
+  "version": 3,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["dist/**"] }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/dist/main.js"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "JWT_SECRET": "@jwt_secret",
+    "CLOUDINARY_CLOUD_NAME": "@cloud_name",
+    "CLOUDINARY_API_KEY": "@cloud_key",
+    "CLOUDINARY_API_SECRET": "@cloud_secret"
+  },
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist"
+}
