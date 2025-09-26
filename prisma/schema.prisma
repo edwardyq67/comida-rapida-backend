@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum Rol {
+  ADMIN
+  KITCHEN
+  USER
+}
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  nombre        String?
+  rol           Rol      @default(USER)
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+}
+
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nombre    String     @unique
+  imagen    String?
+  activo    Boolean    @default(true)
+  productos Producto[]
+
+  @@map("categorias")
+}
+
+model Producto {
+  id                 Int                   @id @default(autoincrement())
+  nombre             String
+  descripcion        String?
+  imagen             String?
+  precio             Float?
+  activo             Boolean               @default(true)
+  categoria_id       Int
+  tamano_id          Int?
+  categoria          Categoria             @relation(fields: [categoria_id], references: [id])
+  tamano             Tamano?               @relation(fields: [tamano_id], references: [id])
+  pedidoItems        PedidoItem[]          @relation("ProductoToPedidoItem")
+  ingredientes       ProductoIngrediente[]
+  opciones           ProductoOpcion[]
+  tamanosDisponibles ProductoTamano[]      @relation("ProductoToProductoTamano")
+}
+
+model Tamano {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @unique
+  productos      Producto[]
+  pedidoItems    PedidoItem[]
+  productosPivot ProductoTamano[]
+
+  @@map("tamanos")
+}
+
+model Opciones {
+  id          Int              @id @default(autoincrement())
+  nombre      String           @unique
+  pedidoItems PedidoItem[]
+  productos   ProductoOpcion[]
+
+  @@map("opciones")
+}
+
+model ProductoOpcion {
+  id          Int      @id @default(autoincrement())
+  producto_id Int
+  opcion_id   Int
+  precio      Float?
+  opcion      Opciones @relation(fields: [opcion_id], references: [id])
+  producto    Producto @relation(fields: [producto_id], references: [id])
+
+  @@unique([producto_id, opcion_id])
+  @@map("producto_opciones")
+}
+
+model Ingrediente {
+  id                 Int                   @id @default(autoincrement())
+  nombre             String                @unique
+  pedidoIngredientes PedidoIngrediente[]
+  productos          ProductoIngrediente[]
+
+  @@map("ingredientes")
+}
+
+model Adicional {
+  id                Int               @id @default(autoincrement())
+  nombre            String
+  precio            Float
+  imagen            String?
+  activo            Boolean           @default(true)
+  pedidoAdicionales PedidoAdicional[]
+
+  @@map("adicionales")
+}
+
+model ProductoTamano {
+  id          Int          @id @default(autoincrement())
+  producto_id Int
+  tamano_id   Int
+  precio      Float
+  pedidoItems PedidoItem[]
+  producto    Producto     @relation("ProductoToProductoTamano", fields: [producto_id], references: [id])
+  tamano      Tamano       @relation(fields: [tamano_id], references: [id])
+
+  @@unique([producto_id, tamano_id])
+  @@map("producto_tamanos")
+}
+
+model ProductoIngrediente {
+  id             Int         @id @default(autoincrement())
+  producto_id    Int
+  ingrediente_id Int
+  opcional       Boolean     @default(false)
+  por_defecto    Boolean     @default(true)
+  ingrediente    Ingrediente @relation(fields: [ingrediente_id], references: [id])
+  producto       Producto    @relation(fields: [producto_id], references: [id])
+
+  @@unique([producto_id, ingrediente_id])
+  @@map("producto_ingredientes")
+}
+
+model EstadoPedido {
+  id      Int      @id @default(autoincrement())
+  nombre  String   @unique
+  pedidos Pedido[]
+
+  @@map("estado_pedidos")
+}
+
+model Pedido {
+  id          Int          @id @default(autoincrement())
+  cliente     String?
+  fecha       DateTime     @default(now())
+  total       Float
+  notas       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  estado_id   Int
+  pedidoItems PedidoItem[]
+  estado      EstadoPedido @relation(fields: [estado_id], references: [id])
+
+  @@map("pedidos")
+}
+
+model PedidoItem {
+  id                 Int                 @id @default(autoincrement())
+  pedido_id          Int
+  producto_id        Int
+  productoTamano_id  Int?
+  cantidad           Int                 @default(1)
+  precio_unitario    Float
+  subtotal           Float
+  observaciones      String?
+  tamanoId           Int?
+  opcionId           Int?
+  pedidoAdicionales  PedidoAdicional[]
+  pedidoIngredientes PedidoIngrediente[]
+  Opcion             Opciones?           @relation(fields: [opcionId], references: [id])
+  pedido             Pedido              @relation(fields: [pedido_id], references: [id])
+  productoTamano     ProductoTamano?     @relation(fields: [productoTamano_id], references: [id])
+  producto           Producto            @relation("ProductoToPedidoItem", fields: [producto_id], references: [id])
+  Tamano             Tamano?             @relation(fields: [tamanoId], references: [id])
+
+  @@map("pedido_items")
+}
+
+model PedidoIngrediente {
+  id             Int         @id @default(autoincrement())
+  pedidoItem_id  Int
+  ingrediente_id Int
+  incluido       Boolean     @default(true)
+  ingrediente    Ingrediente @relation(fields: [ingrediente_id], references: [id])
+  pedidoItem     PedidoItem  @relation(fields: [pedidoItem_id], references: [id])
+
+  @@map("pedido_ingredientes")
+}
+
+model PedidoAdicional {
+  id              Int        @id @default(autoincrement())
+  pedidoItem_id   Int
+  adicional_id    Int
+  cantidad        Int        @default(1)
+  precio_unitario Float
+  adicional       Adicional  @relation(fields: [adicional_id], references: [id])
+  pedidoItem      PedidoItem @relation(fields: [pedidoItem_id], references: [id])
+
+  @@map("pedido_adicionales")
+}
+
