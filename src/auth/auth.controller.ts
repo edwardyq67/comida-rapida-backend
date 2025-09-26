@@ -1,18 +1,19 @@
 // src/auth/auth.controller.ts
-import {
-  Controller,
-  Post,
-  Body,
-  Res,
-  UseGuards,
-  Get,
-  Req,
-} from '@nestjs/common';
-import { Response, Request } from 'express'; // 👈 Importar Request
+
+import type { Response, Request } from 'express'; // 👈 Cambiar a import type
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard'; // 👈 Importar el guard
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
@@ -35,7 +36,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
     return { message: 'Login exitoso', user };
