@@ -1,23 +1,14 @@
 {
-  "version": 3,
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/node",
-      "config": { "outputDirectory": "dist" }
+      "src": "src/main.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist/main.js"
+      "dest": "src/main.ts"
     }
-  ],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "JWT_SECRET": "@jwt_secret",
-    "CLOUDINARY_CLOUD_NAME": "@cloud_name",
-    "CLOUDINARY_API_KEY": "@cloud_key",
-    "CLOUDINARY_API_SECRET": "@cloud_secret"
-  }
+  ]
 }
